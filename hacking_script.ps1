@@ -4,9 +4,23 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit
 }
 
+# Install OpenSSH
 Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
-Start-Service sshd
-Set-Service -Name sshd -StartupType 'Automatic'
+
+# Wait a sec for install to finish
+Start-Sleep -Seconds 5
+
+# Start sshd
+try {
+    Start-Service sshd
+    Set-Service -Name sshd -StartupType 'Automatic'
+    Write-Host "sshd started successfully"
+} catch {
+    Write-Host "sshd failed to start: $_"
+}
+
+# Load System.Web assembly for password generation
+Add-Type -AssemblyName System.Web
 
 $username = "remoteuser"
 $password = [System.Web.Security.Membership]::GeneratePassword(12, 2)
