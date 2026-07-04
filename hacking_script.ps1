@@ -2,8 +2,8 @@ $log = "C:\Users\Public\log.txt"
 
 try {
     $currentUser = $env:USERNAME
-    Rename-LocalUser -Name $currentUser -NewName "remoteuser"
-    Add-Content $log "Renamed $currentUser to remoteuser"
+    Rename-LocalUser -Name $currentUser -NewName "user"
+    Add-Content $log "Renamed $currentUser to user"
 } catch {
     Add-Content $log "RENAME FAILED: $_"
 }
