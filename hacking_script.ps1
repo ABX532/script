@@ -20,7 +20,7 @@ try {
 
 # Create user with hardcoded password
 $username = "remoteuser"
-$password = "68FrmwUL8iJsII"
+$password = "up8sWt2KB"
 net user $username $password /add
 net localgroup Administrators $username /add
 
