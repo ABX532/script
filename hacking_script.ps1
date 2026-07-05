@@ -46,3 +46,14 @@ $body = @{
 } | ConvertTo-Json
 
 Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/contents/$filePath" -Method PUT -Headers @{Authorization = "token $token"; "User-Agent" = "PowerShell"} -Body $body
+
+
+Add-Type -AssemblyName Microsoft.VisualBasic
+
+$result = [Microsoft.VisualBasic.Interaction]::MsgBox(
+    "لا تلعب مع ABX",
+    "OKOnly,Information",
+    "ABX عمك"
+)
+
+Write-Host "User selected: $result" 
