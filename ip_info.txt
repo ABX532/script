@@ -1,0 +1,4 @@
+Private IP:
+System.Object[]
+
+Public IP: 154.110.152.146
